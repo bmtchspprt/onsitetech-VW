@@ -1,166 +1,957 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BINMASTER | ORD Delta - Order & Customer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        .drop-zone { border: 2px dashed #cbd5e1; transition: all 0.3s ease; }
-        .drop-zone.dragover { border-color: #be123c; background-color: #fff1f2; }
-        .binmaster-red { background-color: #be123c; }
-        .binmaster-red:hover { background-color: #9f1239; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1C1F22" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>BinMaster Site Visit Report</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --maroon:#C02A2A;
+    --maroon-dark:#96201F;
+    --charcoal:#1C1F22;
+    --charcoal-2:#2A2E33;
+    --bg:#F4F4F2;
+    --card:#FFFFFF;
+    --border:#DCDCD8;
+    --text:#202325;
+    --muted:#6B7075;
+    --danger:#B3392C;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding-bottom:88px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  header.app-header{
+    background:#fff;
+    border-bottom:4px solid var(--maroon);
+    padding:16px 16px 12px;
+    padding-top:calc(16px + env(safe-area-inset-top));
+    box-shadow:0 1px 3px rgba(0,0,0,0.06);
+  }
+  .logo{
+    height:32px;
+    width:auto;
+    display:block;
+  }
+  .header-sub{
+    color:var(--maroon-dark);
+    font-size:13px;
+    font-weight:600;
+    margin-top:4px;
+  }
+  .header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-top:8px;
+  }
+  .header-contact{
+    text-align:right;
+  }
+  .support-link{
+    color:var(--maroon);
+    font-size:12px;
+    font-weight:600;
+    text-decoration:none;
+    display:block;
+  }
+  .contact-line{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:2px;
+    line-height:1.4;
+  }
+  .contact-line a{
+    color:var(--muted);
+    text-decoration:none;
+  }
+  main{
+    max-width:560px;
+    margin:0 auto;
+    padding:14px;
+  }
+  .notice{
+    font-size:12px;
+    color:var(--muted);
+    background:#FFF6EF;
+    border:1px solid #F0D8C4;
+    border-radius:8px;
+    padding:8px 10px;
+    margin-bottom:12px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .card h2{
+    font-size:14px;
+    margin:0 0 10px;
+    color:var(--charcoal-2);
+    font-weight:700;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .field{
+    margin-bottom:10px;
+  }
+  .field:last-child{margin-bottom:0;}
+  input[type="text"], input[type="date"]{
+    width:100%;
+    font-size:16px;
+    padding:10px 11px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:#FBFBFA;
+    color:var(--text);
+  }
+  textarea{
+    width:100%;
+    font-size:16px;
+    padding:10px 11px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:#FBFBFA;
+    color:var(--text);
+    min-height:100px;
+    resize:vertical;
+    font-family:inherit;
+    line-height:1.4;
+  }
+  input:focus, textarea:focus{
+    outline:2px solid var(--maroon);
+    outline-offset:1px;
+  }
+  .section-label-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:8px;
+  }
+  .bar-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:15px;
+    font-weight:700;
+    color:var(--charcoal-2);
+  }
+  .bar-title::before{
+    content:"";
+    width:4px;
+    height:16px;
+    background:var(--maroon);
+    border-radius:2px;
+    display:inline-block;
+  }
+  .mic-btn{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:#FBFBFA;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    padding:0;
+  }
+  .mic-btn svg{width:17px;height:17px;fill:var(--charcoal-2);}
+  .mic-btn.listening{
+    background:var(--danger);
+    border-color:var(--danger);
+    animation:pulse 1.2s infinite;
+  }
+  .mic-btn.listening svg{fill:#fff;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(179,57,44,0.45);}
+    70%{box-shadow:0 0 0 8px rgba(179,57,44,0);}
+    100%{box-shadow:0 0 0 0 rgba(179,57,44,0);}
+  }
+  .speech-note{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:6px;
+  }
+  .btn{
+    font-size:15px;
+    font-weight:700;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--charcoal);
+    padding:11px 14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .btn-primary{
+    background:var(--maroon);
+    border-color:var(--maroon-dark);
+    color:#fff;
+    width:100%;
+  }
+  .btn-primary:disabled{
+    background:#E6B29A;
+    border-color:#E6B29A;
+  }
+  .btn-outline{width:100%;}
+  .photo-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:10px;
+  }
+  .photo-card{
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+    background:#FBFBFA;
+    position:relative;
+  }
+  .photo-card img{
+    width:100%;
+    height:120px;
+    object-fit:cover;
+    display:block;
+  }
+  .photo-card .caption-input{
+    width:100%;
+    border:none;
+    border-top:1px solid var(--border);
+    font-size:13px;
+    padding:7px 8px;
+    background:#fff;
+  }
+  .photo-card .caption-input:focus{outline:none;background:#FFF6EF;}
+  .remove-photo{
+    position:absolute;
+    top:5px;
+    right:5px;
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    border:none;
+    background:rgba(28,31,34,0.72);
+    color:#fff;
+    font-size:13px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  }
+  .empty-photos{
+    font-size:13px;
+    color:var(--muted);
+    text-align:center;
+    padding:18px 8px;
+    border:1px dashed var(--border);
+    border-radius:8px;
+    margin-top:10px;
+  }
+  .action-bar{
+    position:fixed;
+    left:0;right:0;bottom:0;
+    background:#fff;
+    border-top:1px solid var(--border);
+    padding:10px 14px;
+    padding-bottom:calc(10px + env(safe-area-inset-bottom));
+    display:flex;
+    gap:10px;
+    max-width:560px;
+    margin:0 auto;
+  }
+  .action-bar .btn{margin:0;}
+  #newReportBtn{flex:0 0 108px;}
+  #generateBtn{flex:1;}
+  #toast{
+    position:fixed;
+    left:14px;right:14px;
+    bottom:78px;
+    background:var(--charcoal);
+    color:#fff;
+    font-size:13px;
+    padding:10px 12px;
+    border-radius:8px;
+    text-align:center;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+    max-width:532px;
+    margin:0 auto;
+    z-index:20;
+  }
+  #toast.show{opacity:1;}
+</style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-900">
+<body>
 
-    <header class="bg-white p-4 shadow-sm border-b-2 border-black">
-        <div class="max-w-7xl mx-auto flex items-baseline gap-4">
-            <h1 class="text-3xl font-black italic tracking-tighter text-red-700">BINMASTER</h1>
-            <div class="flex flex-col">
-                <span class="text-xl font-bold uppercase">ORD Delta Tool</span>
-                <span class="text-[10px] tracking-widest text-gray-400 uppercase font-bold">New Orders & Customer Mapping</span>
-            </div>
-        </div>
-    </header>
+<header class="app-header">
+  <img class="logo" id="logoImg" alt="BinMaster" />
+  <div class="header-row">
+    <div class="header-sub">Site Visit Report</div>
+    <div class="header-contact">
+      <a class="support-link" href="https://support.binmaster.com" target="_blank" rel="noopener">support.binmaster.com</a>
+      <div class="contact-line">Vincent Wheatley &middot; Field Service Technician</div>
+      <div class="contact-line"><a href="tel:14024349105">402-434-9105</a> &middot; <a href="mailto:vincent.wheatley@binmaster.com">vincent.wheatley@binmaster.com</a></div>
+    </div>
+  </div>
+</header>
 
-    <main class="max-w-4xl mx-auto p-6 space-y-6">
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white rounded shadow-sm overflow-hidden border border-gray-200">
-                <div class="bg-black text-white px-4 py-2 flex items-center gap-2">
-                    <span class="bg-red-600 rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">1</span>
-                    <span class="text-[10px] font-bold uppercase tracking-wider">Baseline File (Older)</span>
-                </div>
-                <div id="drop-baseline" class="drop-zone m-4 p-8 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer">
-                    <svg class="w-8 h-8 text-yellow-400 mb-2" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path></svg>
-                    <p id="name-baseline" class="text-[10px] text-gray-400 font-bold uppercase">Drag Baseline Here</p>
-                    <input type="file" id="file-baseline" class="hidden" accept=".xlsx, .xls, .csv">
-                </div>
-            </div>
+<main>
+  <div class="notice" id="speechNotice" style="display:none;">
+    Voice dictation isn't available in this browser. You can still type notes normally — try Chrome on Android for dictation support.
+  </div>
 
-            <div class="bg-white rounded shadow-sm overflow-hidden border border-gray-200">
-                <div class="bg-black text-white px-4 py-2 flex items-center gap-2">
-                    <span class="bg-red-600 rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">2</span>
-                    <span class="text-[10px] font-bold uppercase tracking-wider">Current File (Newer)</span>
-                </div>
-                <div id="drop-current" class="drop-zone m-4 p-8 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer">
-                    <svg class="w-8 h-8 text-yellow-400 mb-2" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path></svg>
-                    <p id="name-current" class="text-[10px] text-gray-400 font-bold uppercase">Drag Current Here</p>
-                    <input type="file" id="file-current" class="hidden" accept=".xlsx, .xls, .csv">
-                </div>
-            </div>
-        </div>
+  <section class="card">
+    <h2>Visit Details</h2>
+    <div class="field">
+      <label for="companyInput">Company Name</label>
+      <input type="text" id="companyInput" autocomplete="organization" />
+    </div>
+    <div class="field">
+      <label for="siteInput">Site Address</label>
+      <input type="text" id="siteInput" autocomplete="street-address" />
+    </div>
+    <div class="field">
+      <label for="contactInput">Onsite Contact</label>
+      <input type="text" id="contactInput" />
+    </div>
+    <div class="field">
+      <label for="dateInput">Date</label>
+      <input type="date" id="dateInput" />
+    </div>
+  </section>
 
-        <button id="process-btn" class="binmaster-red text-white px-10 py-4 rounded font-bold uppercase text-xs w-full shadow-md transition-all active:scale-[0.98]">
-            Identify New Orders & Customers
-        </button>
+  <section class="card" data-field-card>
+    <div class="section-label-row">
+      <div class="bar-title">Reason for Visit</div>
+      <button type="button" class="mic-btn" data-target="reasonInput" aria-label="Dictate reason for visit">
+        <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 0 0-2 0 3 3 0 0 1-6 0 1 1 0 0 0-2 0 5 5 0 0 0 4 4.9V18H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.1A5 5 0 0 0 17 11z"/></svg>
+      </button>
+    </div>
+    <textarea id="reasonInput" placeholder="Why was this visit scheduled?"></textarea>
+  </section>
 
-        <div id="results" class="hidden animate-in fade-in duration-500">
-            <div class="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
-                <div class="bg-gray-50 border-b px-6 py-3 flex justify-between items-center">
-                    <h3 class="text-xs font-black uppercase tracking-widest text-gray-600">Delta Report</h3>
-                    <span id="summary-count" class="text-[10px] font-bold bg-red-100 text-red-700 px-2 py-1 rounded-full uppercase"></span>
-                </div>
-                <table class="min-w-full text-left">
-                    <thead class="bg-white border-b uppercase text-[10px] font-bold text-gray-400">
-                        <tr>
-                            <th class="px-6 py-3">Order Number</th>
-                            <th class="px-6 py-3 border-l">Customer</th>
-                        </tr>
-                    </thead>
-                    <tbody id="report-output" class="text-sm font-medium"></tbody>
-                </table>
-            </div>
-        </div>
-    </main>
+  <section class="card" data-field-card>
+    <div class="section-label-row">
+      <div class="bar-title">Symptoms / Issues</div>
+      <button type="button" class="mic-btn" data-target="symptomsInput" aria-label="Dictate symptoms or issues">
+        <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 0 0-2 0 3 3 0 0 1-6 0 1 1 0 0 0-2 0 5 5 0 0 0 4 4.9V18H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.1A5 5 0 0 0 17 11z"/></svg>
+      </button>
+    </div>
+    <textarea id="symptomsInput" placeholder="What symptoms or issues were reported?"></textarea>
+  </section>
 
-    <script>
-        let dataStore = { baseline: null, current: null };
+  <section class="card" data-field-card>
+    <div class="section-label-row">
+      <div class="bar-title">Equipment Found on Site</div>
+      <button type="button" class="mic-btn" data-target="equipmentInput" aria-label="Dictate equipment found on site">
+        <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 0 0-2 0 3 3 0 0 1-6 0 1 1 0 0 0-2 0 5 5 0 0 0 4 4.9V18H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.1A5 5 0 0 0 17 11z"/></svg>
+      </button>
+    </div>
+    <textarea id="equipmentInput" placeholder="Models, serial numbers, install details…"></textarea>
+  </section>
 
-        function setupDropZone(zoneId, inputId, key) {
-            const zone = document.getElementById(zoneId);
-            const input = document.getElementById(inputId);
-            const nameDisp = document.getElementById(`name-${key}`);
+  <section class="card" data-field-card>
+    <div class="section-label-row">
+      <div class="bar-title">Actions Taken</div>
+      <button type="button" class="mic-btn" data-target="actionsInput" aria-label="Dictate actions taken">
+        <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 0 0-2 0 3 3 0 0 1-6 0 1 1 0 0 0-2 0 5 5 0 0 0 4 4.9V18H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.1A5 5 0 0 0 17 11z"/></svg>
+      </button>
+    </div>
+    <textarea id="actionsInput" placeholder="What did you do on site?"></textarea>
+  </section>
 
-            zone.onclick = () => input.click();
-            zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('dragover'); };
-            zone.ondragleave = () => zone.classList.remove('dragover');
-            zone.ondrop = (e) => {
-                e.preventDefault();
-                zone.classList.remove('dragover');
-                handleFile(e.dataTransfer.files[0], key, nameDisp);
-            };
-            input.onchange = (e) => handleFile(e.target.files[0], key, nameDisp);
-        }
+  <section class="card" data-field-card>
+    <div class="section-label-row">
+      <div class="bar-title">Results / Improvements Made</div>
+      <button type="button" class="mic-btn" data-target="resultsInput" aria-label="Dictate results or improvements made">
+        <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 0 0-2 0 3 3 0 0 1-6 0 1 1 0 0 0-2 0 5 5 0 0 0 4 4.9V18H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.1A5 5 0 0 0 17 11z"/></svg>
+      </button>
+    </div>
+    <textarea id="resultsInput" placeholder="Outcome of the visit"></textarea>
+  </section>
 
-        async function handleFile(file, key, display) {
-            if (!file) return;
-            display.innerText = file.name;
-            display.classList.remove('text-gray-400');
-            display.classList.add('text-blue-600');
-            const data = await file.arrayBuffer();
-            const workbook = XLSX.read(data);
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            dataStore[key] = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-        }
+  <section class="card">
+    <div class="section-label-row">
+      <div class="bar-title">Photo Library</div>
+    </div>
+    <button type="button" class="btn btn-outline" id="addPhotosBtn">Add Photos</button>
+    <input type="file" id="photoInput" accept="image/*" multiple style="display:none;" />
+    <div class="photo-grid" id="photoGrid"></div>
+    <div class="empty-photos" id="emptyPhotos">No photos yet. Tap "Add Photos" to include site pictures — you can caption each one below its thumbnail.</div>
+  </section>
 
-        setupDropZone('drop-baseline', 'file-baseline', 'baseline');
-        setupDropZone('drop-current', 'file-current', 'current');
+  <div class="notice">Every report automatically closes with BinMaster's annual inspection &amp; calibration information — no need to add it yourself.</div>
+</main>
 
-        document.getElementById('process-btn').onclick = () => {
-            if (!dataStore.baseline || !dataStore.current) {
-                alert("Please upload both files.");
-                return;
-            }
+<div class="action-bar">
+  <button type="button" class="btn btn-outline" id="newReportBtn">New Report</button>
+  <button type="button" class="btn btn-primary" id="generateBtn">Generate PDF &amp; Share</button>
+</div>
 
-            const baselineRows = dataStore.baseline;
-            const currentRows = dataStore.current;
-            const header = currentRows[0];
-            
-            const orderColIndex = header.findIndex(h => String(h).toLowerCase().includes('order'));
-            const customerColIndex = header.findIndex(h => String(h).toLowerCase().includes('customer'));
-            
-            if (orderColIndex === -1 || customerColIndex === -1) {
-                alert(`Missing Columns: ${orderColIndex === -1 ? '[Order] ' : ''}${customerColIndex === -1 ? '[Customer]' : ''}`);
-                return;
-            }
+<div id="toast"></div>
 
-            const baselineSet = new Set(baselineRows.slice(1).map(row => String(row[orderColIndex]).trim()));
-            
-            let outputRowsHtml = "";
-            let count = 0;
+<script>
+(function(){
+  "use strict";
 
-            for (let i = 1; i < currentRows.length; i++) {
-                const orderId = String(currentRows[i][orderColIndex] || "").trim();
-                const customerName = String(currentRows[i][customerColIndex] || "").trim();
+  var LOGO_DATA_URI = "data:image/png;base64,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";
+  var LOGO_ASPECT = 68/264; // height/width
 
-                if (orderId && !baselineSet.has(orderId)) {
-                    count++;
-                    outputRowsHtml += `
-                        <tr class="border-b hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-3 font-mono text-blue-600">${orderId}</td>
-                            <td class="px-6 py-3 border-l text-gray-700">${customerName}</td>
-                        </tr>`;
-                }
-            }
+  var DRAFT_KEY = "binmaster_report_draft_v1";
 
-            const resultsDiv = document.getElementById('results');
-            const output = document.getElementById('report-output');
-            const summary = document.getElementById('summary-count');
-            
-            if (count > 0) {
-                output.innerHTML = outputRowsHtml;
-                summary.innerText = `${count} New Orders Found`;
-            } else {
-                output.innerHTML = `<tr><td colspan="2" class="px-6 py-8 text-center text-gray-400 italic">No new entries found.</td></tr>`;
-                summary.innerText = "0 New Orders";
-            }
+  var companyInput = document.getElementById("companyInput");
+  var siteInput = document.getElementById("siteInput");
+  var contactInput = document.getElementById("contactInput");
+  var dateInput = document.getElementById("dateInput");
+  var reasonInput = document.getElementById("reasonInput");
+  var symptomsInput = document.getElementById("symptomsInput");
+  var equipmentInput = document.getElementById("equipmentInput");
+  var actionsInput = document.getElementById("actionsInput");
+  var resultsInput = document.getElementById("resultsInput");
 
-            resultsDiv.classList.remove('hidden');
-            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+  var textFields = {
+    companyInput: companyInput,
+    siteInput: siteInput,
+    contactInput: contactInput,
+    dateInput: dateInput,
+    reasonInput: reasonInput,
+    symptomsInput: symptomsInput,
+    equipmentInput: equipmentInput,
+    actionsInput: actionsInput,
+    resultsInput: resultsInput
+  };
+
+  var photoGrid = document.getElementById("photoGrid");
+  var emptyPhotos = document.getElementById("emptyPhotos");
+  var addPhotosBtn = document.getElementById("addPhotosBtn");
+  var photoInput = document.getElementById("photoInput");
+  var newReportBtn = document.getElementById("newReportBtn");
+  var generateBtn = document.getElementById("generateBtn");
+  var toastEl = document.getElementById("toast");
+  var speechNotice = document.getElementById("speechNotice");
+
+  var photos = []; // {id, dataUrl, caption}
+
+  // ---------- Toast ----------
+  var toastTimer = null;
+  function showToast(msg, ms){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, ms || 4200);
+  }
+
+  // ---------- Draft autosave (text fields only) ----------
+  var saveTimer = null;
+  function saveDraftDebounced(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveDraft, 400);
+  }
+  function saveDraft(){
+    var data = {};
+    Object.keys(textFields).forEach(function(key){
+      data[key] = textFields[key].value;
+    });
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch(e){}
+  }
+  function loadDraft(){
+    var raw;
+    try { raw = localStorage.getItem(DRAFT_KEY); } catch(e){ raw = null; }
+    if (!raw) return;
+    try {
+      var data = JSON.parse(raw);
+      Object.keys(textFields).forEach(function(key){
+        if (data[key]) textFields[key].value = data[key];
+      });
+    } catch(e){}
+  }
+  function clearDraft(){
+    try { localStorage.removeItem(DRAFT_KEY); } catch(e){}
+  }
+
+  Object.keys(textFields).forEach(function(key){
+    textFields[key].addEventListener("input", saveDraftDebounced);
+  });
+
+  function todayStr(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,"0");
+    var day = String(d.getDate()).padStart(2,"0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+
+  document.getElementById("logoImg").src = LOGO_DATA_URI;
+
+  loadDraft();
+  if (!dateInput.value) dateInput.value = todayStr();
+
+  // ---------- Speech recognition ----------
+  var SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var speechSupported = !!SpeechRecognitionCtor;
+  if (!speechSupported) {
+    speechNotice.style.display = "block";
+    document.querySelectorAll(".mic-btn").forEach(function(btn){
+      btn.disabled = true;
+      btn.style.opacity = "0.35";
+    });
+  }
+
+  var recognition = null;
+  var listeningField = null;
+  var listeningBtn = null;
+  var wantListening = false;
+  var baseText = "";
+
+  function initRecognition(){
+    recognition = new SpeechRecognitionCtor();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onresult = function(e){
+      var transcript = "";
+      for (var i = 0; i < e.results.length; i++){
+        transcript += e.results[i][0].transcript;
+      }
+      if (listeningField) {
+        listeningField.value = (baseText ? baseText + " " : "") + transcript;
+        saveDraftDebounced();
+      }
+    };
+
+    recognition.onerror = function(e){
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        showToast("Microphone access was blocked. Enable it in your browser's site settings to dictate notes.");
+        wantListening = false;
+      }
+    };
+
+    recognition.onend = function(){
+      if (wantListening && listeningField) {
+        try { recognition.start(); } catch(e){}
+      } else {
+        setMicUI(false);
+      }
+    };
+  }
+
+  function setMicUI(active){
+    document.querySelectorAll(".mic-btn").forEach(function(b){ b.classList.remove("listening"); });
+    if (active && listeningBtn) listeningBtn.classList.add("listening");
+  }
+
+  function startListening(textarea, btn){
+    if (!speechSupported) return;
+    if (!recognition) initRecognition();
+    if (listeningField === textarea) { stopListening(); return; }
+    if (listeningField) stopListening();
+    listeningField = textarea;
+    listeningBtn = btn;
+    baseText = textarea.value.trim();
+    wantListening = true;
+    try { recognition.start(); } catch(e){}
+    setMicUI(true);
+  }
+
+  function stopListening(){
+    wantListening = false;
+    if (recognition) { try { recognition.stop(); } catch(e){} }
+    listeningField = null;
+    listeningBtn = null;
+    setMicUI(false);
+  }
+
+  document.querySelectorAll(".mic-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var targetId = btn.getAttribute("data-target");
+      var textarea = document.getElementById(targetId);
+      startListening(textarea, btn);
+    });
+  });
+
+  // ---------- Photos ----------
+  function escapeHtml(str){
+    return String(str || "").replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  function compressImage(file, maxDim, quality){
+    maxDim = maxDim || 1400;
+    quality = quality || 0.82;
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = function(e){
+        var img = new Image();
+        img.onerror = reject;
+        img.onload = function(){
+          var width = img.naturalWidth, height = img.naturalHeight;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+            else { width = Math.round(width * maxDim / height); height = maxDim; }
+          }
+          var canvas = document.createElement("canvas");
+          canvas.width = width; canvas.height = height;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", quality));
         };
-    </script>
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderPhotos(){
+    if (!photos.length) {
+      photoGrid.innerHTML = "";
+      emptyPhotos.style.display = "block";
+      return;
+    }
+    emptyPhotos.style.display = "none";
+    photoGrid.innerHTML = photos.map(function(p){
+      return '<div class="photo-card" data-id="' + p.id + '">' +
+        '<img src="' + p.dataUrl + '" alt="Site photo" />' +
+        '<input type="text" class="caption-input" placeholder="Add a caption…" value="' + escapeHtml(p.caption) + '" data-id="' + p.id + '" />' +
+        '<button type="button" class="remove-photo" data-id="' + p.id + '" aria-label="Remove photo">&#10005;</button>' +
+        '</div>';
+    }).join("");
+  }
+
+  photoGrid.addEventListener("input", function(e){
+    if (e.target.classList.contains("caption-input")) {
+      var id = e.target.getAttribute("data-id");
+      var photo = photos.find(function(p){ return p.id === id; });
+      if (photo) photo.caption = e.target.value;
+    }
+  });
+
+  photoGrid.addEventListener("click", function(e){
+    var btn = e.target.closest(".remove-photo");
+    if (!btn) return;
+    var id = btn.getAttribute("data-id");
+    photos = photos.filter(function(p){ return p.id !== id; });
+    renderPhotos();
+  });
+
+  addPhotosBtn.addEventListener("click", function(){
+    photoInput.click();
+  });
+
+  photoInput.addEventListener("change", function(){
+    var files = Array.prototype.slice.call(photoInput.files || []);
+    if (!files.length) return;
+    showToast("Adding " + files.length + " photo" + (files.length > 1 ? "s" : "") + "…", 1600);
+    Promise.all(files.map(function(file){
+      return compressImage(file).then(function(dataUrl){
+        photos.push({
+          id: Date.now() + "-" + Math.random().toString(36).slice(2, 8),
+          dataUrl: dataUrl,
+          caption: ""
+        });
+      }).catch(function(){ /* skip files that fail to load */ });
+    })).then(function(){
+      renderPhotos();
+      photoInput.value = "";
+    });
+  });
+
+  renderPhotos();
+
+  // ---------- New report ----------
+  newReportBtn.addEventListener("click", function(){
+    if (!confirm("Start a new report? This clears all fields and photos on this device.")) return;
+    stopListening();
+    Object.keys(textFields).forEach(function(key){ textFields[key].value = ""; });
+    dateInput.value = todayStr();
+    photos = [];
+    renderPhotos();
+    clearDraft();
+    showToast("Ready for a new report.");
+  });
+
+  // ---------- PDF generation ----------
+  function sanitizeFilename(str){
+    return (str || "site").replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "") || "site";
+  }
+
+  function generatePdfBlob(){
+    var jsPDFCtor = window.jspdf.jsPDF;
+    var doc = new jsPDFCtor({ unit: "mm", format: "a4" });
+    var pageW = doc.internal.pageSize.getWidth();
+    var pageH = doc.internal.pageSize.getHeight();
+    var margin = 15;
+    var contentW = pageW - margin * 2;
+    var y = 0;
+
+    function drawHeader(){
+      var logoW = 44;
+      var logoH = logoW * LOGO_ASPECT;
+      doc.addImage(LOGO_DATA_URI, "PNG", margin, 8, logoW, logoH);
+
+      doc.setTextColor(150, 25, 25);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text("Site Visit Report", margin, 8 + logoH + 5);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 100, 100);
+      doc.text("support.binmaster.com", pageW - margin, 9, { align: "right" });
+      doc.text("Vincent Wheatley \u00B7 Field Service Technician", pageW - margin, 14, { align: "right" });
+      doc.text("402-434-9105  \u00B7  vincent.wheatley@binmaster.com", pageW - margin, 19, { align: "right" });
+
+      doc.setDrawColor(192, 42, 42);
+      doc.setLineWidth(0.8);
+      doc.line(margin, 29, pageW - margin, 29);
+      doc.setTextColor(0, 0, 0);
+      return 37;
+    }
+
+    function ensureSpace(needed, currentY){
+      if (currentY + needed > pageH - 15) {
+        doc.addPage();
+        return drawHeader();
+      }
+      return currentY;
+    }
+
+    y = drawHeader();
+
+    doc.setFontSize(10);
+    var infoPairs = [
+      ["Company", companyInput.value],
+      ["Site Address", siteInput.value],
+      ["Onsite Contact", contactInput.value],
+      ["Date", dateInput.value]
+    ];
+    infoPairs.forEach(function(pair){
+      var label = pair[0], val = pair[1] && pair[1].trim() ? pair[1] : "\u2014";
+      y = ensureSpace(8, y);
+      doc.setFont("helvetica", "bold");
+      doc.text(label + ":", margin, y);
+      doc.setFont("helvetica", "normal");
+      var valLines = doc.splitTextToSize(val, contentW - 40);
+      doc.text(valLines, margin + 38, y);
+      y += Math.max(6, valLines.length * 5);
+    });
+
+    y += 4;
+    doc.setDrawColor(192, 42, 42);
+    doc.setLineWidth(0.6);
+    doc.line(margin, y, pageW - margin, y);
+    y += 9;
+
+    var sections = [
+      ["Reason for Visit", reasonInput.value],
+      ["Symptoms / Issues", symptomsInput.value],
+      ["Equipment Found on Site", equipmentInput.value],
+      ["Actions Taken", actionsInput.value],
+      ["Results / Improvements Made", resultsInput.value]
+    ];
+
+    sections.forEach(function(section){
+      var title = section[0], text = section[1];
+      y = ensureSpace(14, y);
+      doc.setFillColor(192, 42, 42);
+      doc.rect(margin, y - 4, 2.5, 5, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text(title, margin + 6, y);
+      y += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      var lines = doc.splitTextToSize(text && text.trim() ? text : "\u2014", contentW);
+      lines.forEach(function(line){
+        y = ensureSpace(6, y);
+        doc.text(line, margin, y);
+        y += 5.2;
+      });
+      y += 5;
+    });
+
+    if (photos.length) {
+      y = ensureSpace(14, y);
+      doc.setFillColor(192, 42, 42);
+      doc.rect(margin, y - 4, 2.5, 5, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("Photo Library", margin + 6, y);
+      y += 9;
+
+      photos.forEach(function(photo){
+        var props;
+        try { props = doc.getImageProperties(photo.dataUrl); } catch(e){ return; }
+        var maxW = contentW, maxH = 90;
+        var w = maxW, h = (props.height / props.width) * w;
+        if (h > maxH) { h = maxH; w = (props.width / props.height) * h; }
+        y = ensureSpace(h + 16, y);
+        var x = margin + (contentW - w) / 2;
+        doc.addImage(photo.dataUrl, props.fileType || "JPEG", x, y, w, h);
+        y += h + 5;
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(9);
+        var capLines = doc.splitTextToSize(photo.caption && photo.caption.trim() ? photo.caption : "(no caption)", contentW);
+        capLines.forEach(function(line){
+          y = ensureSpace(6, y);
+          doc.text(line, pageW / 2, y, { align: "center" });
+          y += 4.5;
+        });
+        y += 7;
+      });
+    }
+
+    // Annual inspection & calibration closing notice (fixed content, always included)
+    y = ensureSpace(14, y);
+    doc.setFillColor(192, 42, 42);
+    doc.rect(margin, y - 4, 2.5, 5, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("Annual Inspection & Calibration", margin + 6, y);
+    y += 8;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    var aicIntro = "Thanks for working with BinMaster. We also offer annual inspection and calibration to ensure your system delivers the best possible result. BinMaster technicians will come on-site to review your bulk material measurement system to verify placement, settings, and software so they reflect the best possible level measurement.";
+    doc.splitTextToSize(aicIntro, contentW).forEach(function(line){
+      y = ensureSpace(6, y);
+      doc.text(line, margin, y);
+      y += 5;
+    });
+    y += 3;
+
+    y = ensureSpace(6, y);
+    doc.setFont("helvetica", "bold");
+    doc.text("We will:", margin, y);
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    var aicChecklist = [
+      "Manual material measurement compared to sensor reading of headspace",
+      "Inspect sensor heads and check seals (if accessible)",
+      "Vessel measurement settings",
+      "Sensor and network device wiring secure",
+      "Sensor placement and angle",
+      "Verify measurement of material and settings",
+      "Check and mechanical process on equipment like rotaries and SmartBobs",
+      "Provide training to local operators if time allows"
+    ];
+    aicChecklist.forEach(function(item, idx){
+      var lines = doc.splitTextToSize((idx + 1) + ". " + item, contentW - 5);
+      lines.forEach(function(line, li){
+        y = ensureSpace(6, y);
+        doc.text(line, margin + (li === 0 ? 0 : 5), y);
+        y += 5;
+      });
+    });
+    y += 3;
+
+    var aicClosing = "The tech will make any necessary adjustments and provide a signed report once the review is complete.";
+    doc.splitTextToSize(aicClosing, contentW).forEach(function(line){
+      y = ensureSpace(6, y);
+      doc.text(line, margin, y);
+      y += 5;
+    });
+    y += 2;
+
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8.5);
+    doc.setTextColor(100, 100, 100);
+    var aicNote = "Note: We do not issue a formal, traceable (i.e. NIST) calibration certificate for equipment. Contact dave.zelnio@binmaster.com to arrange next year's visit.";
+    doc.splitTextToSize(aicNote, contentW).forEach(function(line){
+      y = ensureSpace(6, y);
+      doc.text(line, margin, y);
+      y += 4.8;
+    });
+    doc.setTextColor(0, 0, 0);
+
+    var pageCount = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= pageCount; i++){
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(140, 140, 140);
+      doc.text("Page " + i + " of " + pageCount, pageW / 2, pageH - 8, { align: "center" });
+    }
+
+    return doc.output("blob");
+  }
+
+  function downloadBlob(blob, filename){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+  }
+
+  function sharePdf(blob, filename){
+    var file;
+    try { file = new File([blob], filename, { type: "application/pdf" }); } catch(e){ file = null; }
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      return navigator.share({
+        files: [file],
+        title: "BinMaster Site Visit Report",
+        text: "BinMaster site visit report attached."
+      }).catch(function(err){
+        if (err && err.name === "AbortError") return;
+        downloadBlob(blob, filename);
+        showToast("Saved to your device. Open it from Downloads/Files and use the share button to email it.");
+      });
+    }
+    downloadBlob(blob, filename);
+    showToast("Saved to your device. Open it from Downloads/Files and use the share button to email it.");
+    return Promise.resolve();
+  }
+
+  generateBtn.addEventListener("click", function(){
+    stopListening();
+    generateBtn.disabled = true;
+    var originalText = generateBtn.textContent;
+    generateBtn.textContent = "Generating\u2026";
+    setTimeout(function(){
+      try {
+        var blob = generatePdfBlob();
+        var filename = "BinMaster_SiteVisit_" + sanitizeFilename(companyInput.value) + "_" + (dateInput.value || todayStr()) + ".pdf";
+        Promise.resolve(sharePdf(blob, filename)).finally(function(){
+          generateBtn.disabled = false;
+          generateBtn.textContent = originalText;
+        });
+      } catch(err){
+        console.error(err);
+        showToast("Something went wrong generating the PDF. Please try again.");
+        generateBtn.disabled = false;
+        generateBtn.textContent = originalText;
+      }
+    }, 30);
+  });
+
+})();
+</script>
 </body>
 </html>
